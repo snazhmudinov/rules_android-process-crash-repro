@@ -1,0 +1,22 @@
+load("@rules_android//rules:rules.bzl", "android_binary", "android_library")
+
+android_library(
+    name = "test_lib",
+    testonly = True,
+    srcs = glob(["src/**/*.java"]),
+    custom_package = "com.example.test",
+    deps = [
+        "//app:lib",
+        "@maven_test//:androidx_test_ext_junit",
+        "@maven_test//:junit_junit",
+    ],
+)
+
+android_binary(
+    name = "test_app",
+    testonly = True,
+    custom_package = "com.example.test",
+    instruments = "//app:app",
+    manifest = "AndroidTestManifest.xml",
+    deps = [":test_lib"],
+)

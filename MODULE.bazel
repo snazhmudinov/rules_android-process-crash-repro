@@ -1,0 +1,40 @@
+module(name = "repro", version = "0.0.1")
+
+bazel_dep(name = "rules_java", version = "7.11.1")
+bazel_dep(name = "bazel_skylib", version = "1.3.0")
+bazel_dep(name = "rules_android", version = "0.7.1")
+bazel_dep(name = "rules_jvm_external", version = "6.6")
+
+remote_android_extensions = use_extension(
+    "@rules_android//bzlmod_extensions:android_extensions.bzl",
+    "remote_android_tools_extensions",
+)
+use_repo(remote_android_extensions, "android_tools")
+
+android_sdk_repository_extension = use_extension(
+    "@rules_android//rules/android_sdk_repository:rule.bzl",
+    "android_sdk_repository_extension",
+)
+use_repo(android_sdk_repository_extension, "androidsdk")
+
+register_toolchains("@androidsdk//:sdk-toolchain", "@androidsdk//:all")
+
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+maven.install(
+    name = "maven_test",
+    artifacts = [
+        "androidx.test.ext:junit:1.1.5",
+        "androidx.test:monitor:1.6.1",
+        "androidx.test:core:1.5.0",
+        "androidx.test.services:storage:1.4.2",
+        "junit:junit:4.13.2",
+    ],
+    repositories = [
+        "https://maven.google.com",
+        "https://repo1.maven.org/maven2",
+    ],
+    version_conflict_policy = "pinned",
+    aar_import_bzl_label = "@rules_android//rules:rules.bzl",
+    use_starlark_android_rules = True,
+)
+use_repo(maven, "maven_test")
